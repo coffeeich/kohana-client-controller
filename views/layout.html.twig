@@ -6,13 +6,13 @@
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         {% endblock %}
 
-        {% block stylesheets%}{% endblock stylesheets%}
-
         {{ inject_theme_styles() }}
         <!--[if lte IE 7]>
             {{ inject_legacy_support_styles() }}
             {{ inject_legacy_support_script() }}
         <![endif]-->
+
+        {% block stylesheets%}{% endblock stylesheets%}
     </head>
     <body>
         {% block body%}{% endblock body%}
