@@ -130,9 +130,7 @@ abstract class Kohana_Client {
             return;
         }
 
-        if (! empty($theme)) {
-            $theme = "skins/%s/%s/$theme";
-        }
+        $themeMask = "skins/%s/%s/$theme";
 
         $isDevelopment = self::is_development_controller_script($needLegacyConf);
 
@@ -140,19 +138,21 @@ abstract class Kohana_Client {
 
         $ext = $isDevelopment ? self::CLIENT_PAGE_THEME_DEVELOPMENT: self::CLIENT_PAGE_THEME_PRODUCTION;
 
+        $prefix = "/{$ext}/{$theme}.{$ext}";
+
         if (! $isDevelopment) {
-            $builds = array_filter(glob(getcwd() . $scripts . '/' . sprintf($theme, $page . '.*', $ext) . '.' . $ext), function($path) use ($page) {
-                return preg_replace('/\.\d+$/', '', basename(dirname(dirname($path)))) === $page;
+            $builds = array_filter(glob(getcwd() . $scripts . '/' . sprintf($themeMask, $page . '.*', $ext) . '.' . $ext), function($path) use ($page, $prefix) {
+                return preg_replace('/\.\d+$/', '', basename(strstr($path, $prefix, TRUE))) === $page;
             });
 
             // и если она найдена осуществляем подмену
             if (! empty($builds)) {
                 // берем последнюю, так как они уже отсортированы
-                $page = basename(dirname(dirname(array_pop($builds))));
+                $page = basename(strstr(array_pop($builds), $prefix, TRUE));
             }
         }
 
-        $theme = $scripts . '/' . sprintf($theme, $page, $ext) . '.' . $ext;
+        $style = $scripts . '/' . sprintf($themeMask, $page, $ext) . '.' . $ext;
 
         $rel = 'stylesheet';
 
@@ -160,7 +160,7 @@ abstract class Kohana_Client {
             $rel .= '/' . $ext;
         }
 
-        return HTML::style($theme, array( 'rel' => $rel ));
+        return HTML::style($style, array( 'rel' => $rel ));
     }
 
     /**
